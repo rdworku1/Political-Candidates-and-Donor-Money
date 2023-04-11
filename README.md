@@ -1,2 +1,4 @@
 # Political-Candidates-and-Donor-Money
 Political candidates and Donor money
+
+This report seeks to investigate the relationship between political candidates’ party affiliation and the amount of money their campaigns receive during an election year within the timeframe of 2008 to 2016. The research question we had in mind was: is there a difference in the number of contributions made for political candidates in relation to their party affiliation? Our initial hypothesis was that there was no difference in the amount of money given for candidates’ campaigns regardless of whether they ran as Democratic or Republican. However, in our analysis of the data, we discovered that Republican candidates were more likely to receive greater monetary contributions toward their campaign than their Democratic peers. In summary, bipartisan political action committees tend to skew their contributions toward one major political party.
