@@ -1,0 +1,112 @@
+---
+title: "Mini-Project 2"
+author: "Sec 01 AM, Group 6: Rekik Worku and Whitney Mutalemwa"
+date: "November 1st, 2019"
+output:
+  html_document:
+    highlight: tango
+    theme: cosmo
+    toc: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: false
+    df_print: kable
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+# Set R chunk default options:
+# -do not output all R messages in html report
+# -do not output all R warnings in html report
+# -set default figure widths and heights
+knitr::opts_chunk$set(
+  message = FALSE, warning = FALSE, fig.width = 16/2, fig.height = 9/2
+)
+```
+
+```{r, echo=FALSE}
+# Load all packages here
+library(ggplot2)
+library(dplyr)
+library(readr)
+```
+
+```{r, echo=FALSE}
+# Load all the data here. If you are in RStudio "project mode", R takes
+# care of the directory path for you. In other words you don't need to use
+# "~/Downloads/MP2/candidates.csv"
+candidates <- read_csv("candidates.csv")
+committees <- read_csv("committees.csv")
+contributions <- read_csv("contributions.csv")
+house_elections <- read_csv("house_elections.csv")
+```
+
+# Are Political Action Committees Bipartisan?
+
+
+
+# Summary
+
+This report seeks to investigate the relationship between political candidates’ party affiliation and the amount of money their campaigns receive during an election year within the timeframe 2008 to 2016. The research question we had in mind was: is there a difference in the amount of contributions made for political candidates in relation to their party affiliation? Our initial hypothesis was that there was no difference in the amount of money given for candidates’ campaigns regardless of whether they ran as Democratic or Republican. However, in our analysis of the data, we discovered that Republican candidates were more likely to receive greater monetary contributions towards their campaign than their Democratic peers. In summary, bipartisan political action committees tend to skew their contributions towards one major political party.
+
+
+# Introduction
+
+In answering our research question, we wanted to use campaign contribution data from largely battleground states for both Democrats and Republicans, two of the most significant political parties in the United States. We chose Ohio and Florida, and using data provided by the FEC, we aimed to look at the amount each traditional political action committee (PAC) gave to individual Republican and Democratic candidates per election cycle. The reason we chose traditional political action committees is because they are limited by law and can only accept $2,700 from individuals per election cycle. In addition, PACs can directly contribute to parties whereas Super PACs cannot. Given that there tends to be two election cycles per year, traditional PACs can take up to $5,400 in primary and general elections combined.^[Cock, Matthew. (2019, July 03). The Era of the Super PAC in American Politics. Retrieved October 30, 2019, from https://www.thoughtco.com/what-is-a-super-pac-3367928] This should, theoretically, put all traditional PACs on the same level of monetary power and help us assess any trends that show whether there are differences in PAC contribution in relation to political parties.
+
+
+# Political Action Groups and their Contributions for Candidates in Ohio and Florida
+
+**This graph is to show the contributions political action committees give to Republican and Democratic candidates in "swing states" like Ohio and Florida.**
+
+Since the limits for PACs are around $5,400, it is not surprising that most values fall below that. The interquartile range that shows the middle 50% values for contributions for each party does not have much spread. This means most contributions from PACs to Ohio candidates range from 1 to 300 for Democrats and 1 to 500 for Republicans.  Most contributions from PACs to Florida candidates range from 1 to 500 for Democrats and 1 to 1000 for Republicans.
+
+Our research question was to see if political action committees are in fact bipartisan. For Ohio, the interquartile range for Democratic and Republican contributions are narrow but Republican candidates tend to receive higher donations from PACs. In Florida, individual contributions for Republican candidates tend to be higher than for Democratic candidates.
+
+
+```{r, echo = FALSE}
+# Put code to create first data visualization here:
+cand_con <- candidates %>%
+  left_join(contributions, by = "cand_id") %>%
+  select(cand_id, cand_party_affiliation, cand_election_yr, cand_office_state, entity_type, transaction_amt) %>%
+  filter(cand_party_affiliation == "REP" | cand_party_affiliation == "DEM", cand_office_state == "OH"|cand_office_state == "FL",  entity_type == "PAC", transaction_amt > 0)
+
+ggplot(data = cand_con, mapping = aes(x = cand_party_affiliation, y = transaction_amt, color = cand_party_affiliation)) +
+  labs(x = "Candidate Party Affiliation", y = "Contribution Amount", title = "PAC Donations To Republican & Democratic Candidates in OH & FL",
+              subtitle="Contributions from 2008-2016", col="Political Party") +
+  geom_boxplot(alpha=0.2) +  scale_color_manual(values = c("blue", "red"))+
+  scale_x_discrete(labels=c("Democrat", "Republican"))+
+  facet_wrap(~cand_office_state)+
+  ylim(0,5400)
+```
+
+
+# Bipartisan and General Political Contributions
+
+**This graph is to show the relationship between political action committees party affiliation and the contributions they give to Republican and Democratic candidates in Ohio and Florida**
+
+Most contributions to Republican and Democratic candidates in Ohio and Florida come from PACs that identify as bipartisan organizations. PACS usually support candidates who support the same issues as them, so it is reasonable to say that PACs value the ideas of candidates versus their party affiliation. This is important to note that bipartisan PACs donate more money towards Republican candidates in Ohio whereas bipartisan PACs donate more money towards Democratic candidates in Florida. Even when PACs identify as bipartisan, the visualisation shows that bipartisan PACs are more likely to donate more to one major political party. 
+
+```{r, echo = FALSE}
+# Put code to create second non-redundant data visualization here:
+cand_interest <- cand_con %>%
+  inner_join(committees, by = "cand_id") %>%
+  select(cand_party_affiliation, cand_election_yr, cand_office_state, transaction_amt, cmte_name, cmte_type, cmte_state, cmte_party_affiliation)
+
+library(scales)
+
+ggplot(data = cand_interest, mapping = aes(x = cmte_party_affiliation, y = transaction_amt, fill = cand_party_affiliation)) +
+  labs(x = "Committee Party Affiliation", y = "Total Contribution Amount", title = "How Committee Party Affiliation Affects Candidate Contributions",
+              subtitle="Contributions from 2008-2016", fill="Political Party")+
+  geom_col()  +  scale_fill_manual(values = c("blue", "red"))+
+  scale_x_discrete(labels=c("Democrat", "Republican", "Bipartisan"))+
+  facet_wrap(~cand_office_state)+
+  scale_y_continuous(labels = dollar)
+```
+
+
+## Further Reading
+Koba, Mark. (2012, Mar 05). Why PACs, Super PACs Dominate the Political Landscape. Retrieved October 30, 2019, from https://www.cnbc.com/id/46341236
+
+Stockman, Farah. (2018, Aug 12). For Voters Sick of Money in Politics, a New Pitch: No PAC Money Accepted. Retrieved October 30, 2019, from https://www.nytimes.com/2018/08/12/us/money-politics-dean-phillips.html
+
+# References and Citations
